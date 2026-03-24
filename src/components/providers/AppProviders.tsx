@@ -11,18 +11,23 @@ import {
 	AUTH_ENABLED,
 } from "@/config/env";
 import { store } from "@/store";
+import {
+	COLOR_PRIMARY,
+	COLOR_SECONDARY,
+	COLOR_BACKGROUND,
+} from "@/config/colors";
 
 const theme = createTheme({
 	palette: {
 		mode: "light",
 		primary: {
-			main: "#0b3c5d",
+			main: COLOR_PRIMARY,
 		},
 		secondary: {
-			main: "#ff6f00",
+			main: COLOR_SECONDARY,
 		},
 		background: {
-			default: "#f3f6fb",
+			default: COLOR_BACKGROUND,
 		},
 	},
 	shape: {

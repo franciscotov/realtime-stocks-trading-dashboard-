@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -22,18 +22,9 @@ import {
 import type { IntervalResolution } from "@/types/stock";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setIntervalResolution } from "@/store/slices/marketSlice";
+import { COLOR_BORDER, LINE_COLORS } from "@/config/colors";
 
-const LINE_COLORS = [
-  "#0b3c5d",
-  "#ff6f00",
-  "#c62828",
-  "#2e7d32",
-  "#7b1fa2",
-  "#283593",
-  "#00838f",
-];
-
-export function MultiStockChart() {
+export const MultiStockChart = memo(function MultiStockChart() {
   const dispatch = useAppDispatch();
   const watchlist = useAppSelector((state) => state.watchlist.items);
   const historyBySymbol = useAppSelector(
@@ -78,7 +69,7 @@ export function MultiStockChart() {
   return (
     <Paper
       elevation={0}
-      sx={{ p: 2, border: "1px solid #dce3ec", height: 440 }}
+      sx={{ p: 2, border: `1px solid ${COLOR_BORDER}`, height: 440 }}
     >
       <Stack
         direction="row"
@@ -126,4 +117,4 @@ export function MultiStockChart() {
       </Box>
     </Paper>
   );
-}
+});

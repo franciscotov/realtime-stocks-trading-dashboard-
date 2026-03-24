@@ -2,6 +2,7 @@
 
 import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { useAppSelector } from "@/store/hooks";
+import { COLOR_BORDER, COLOR_SUCCESS, COLOR_DANGER } from "@/config/colors";
 
 export function TopCards() {
   const watchlist = useAppSelector((state) => state.watchlist.items);
@@ -19,8 +20,8 @@ export function TopCards() {
               elevation={0}
               sx={{
                 p: 2,
-                border: "1px solid #dce3ec",
-                borderLeft: `5px solid ${isAboveAlert ? "#2e7d32" : "#c62828"}`,
+                border: `1px solid ${COLOR_BORDER}`,
+                borderLeft: `5px solid ${isAboveAlert ? COLOR_SUCCESS : COLOR_DANGER}`,
               }}
             >
               <Stack spacing={0.6}>
@@ -32,7 +33,7 @@ export function TopCards() {
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: isAboveAlert ? "#2e7d32" : "#c62828", fontWeight: 600 }}
+                  sx={{ color: isAboveAlert ? COLOR_SUCCESS : COLOR_DANGER, fontWeight: 600 }}
                 >
                   {quote
                     ? `${quote.changePercent >= 0 ? "+" : ""}${quote.changePercent.toFixed(2)}%`

@@ -18,18 +18,18 @@ import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Autocomplete,
   Box,
   Button,
+  CircularProgress,
   IconButton,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { STOCK_OPTIONS } from "@/config/stocks";
+import { useStockSymbols } from "@/lib/useStockSymbols";
+import { COLOR_BORDER, COLOR_BORDER_SUBTLE } from "@/config/colors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   addStock,
@@ -57,7 +57,7 @@ function SortableWatchItem({ symbol }: { symbol: string }) {
       ref={setNodeRef}
       sx={{
         p: 1.2,
-        border: "1px solid #dde4ee",
+        border: `1px solid ${COLOR_BORDER_SUBTLE}`,
         transform: CSS.Translate.toString(transform),
         transition,
       }}
@@ -94,13 +94,14 @@ export function WatchlistSidebar() {
   const dispatch = useAppDispatch();
   const watchlist = useAppSelector((state) => state.watchlist.items);
 
-  const [selectedSymbol, setSelectedSymbol] = useState<string>(STOCK_OPTIONS[0]);
+  const { symbols, loading: symbolsLoading } = useStockSymbols();
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
   const [alertPrice, setAlertPrice] = useState<number>(100);
 
   const availableSymbols = useMemo(() => {
     const used = new Set(watchlist.map((item) => item.symbol));
-    return STOCK_OPTIONS.filter((symbol) => !used.has(symbol));
-  }, [watchlist]);
+    return symbols.filter((s) => !used.has(s));
+  }, [symbols, watchlist]);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -111,11 +112,7 @@ export function WatchlistSidebar() {
     }
 
     dispatch(addStock({ symbol: selectedSymbol, alertPrice }));
-
-    const next = availableSymbols.find((symbol) => symbol !== selectedSymbol);
-    if (next) {
-      setSelectedSymbol(next);
-    }
+    setSelectedSymbol(null);
   };
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -131,9 +128,8 @@ export function WatchlistSidebar() {
       }),
     );
   };
-
   return (
-    <Paper elevation={0} sx={{ p: 2, border: "1px solid #dce3ec" }}>
+    <Paper elevation={0} sx={{ p: 2, border: `1px solid ${COLOR_BORDER}` }}>
       <Stack spacing={2}>
         <Typography variant="h6" fontWeight={700}>
           Watchlist
@@ -141,20 +137,31 @@ export function WatchlistSidebar() {
 
         <Box component="form" onSubmit={onAdd}>
           <Stack spacing={1.2}>
-            <InputLabel id="stock-select-label">Stock Symbol</InputLabel>
-            <Select
-              labelId="stock-select-label"
-              size="small"
+            <Autocomplete
+              options={availableSymbols}
               value={selectedSymbol}
-              onChange={(event) => setSelectedSymbol(event.target.value)}
-              disabled={availableSymbols.length === 0}
-            >
-              {availableSymbols.map((symbol) => (
-                <MenuItem key={symbol} value={symbol}>
-                  {symbol}
-                </MenuItem>
-              ))}
-            </Select>
+              onChange={(_, value) => setSelectedSymbol(value)}
+              loading={symbolsLoading}
+              disabled={!symbolsLoading && availableSymbols.length === 0}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Stock Symbol"
+                  size="small"
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {symbolsLoading && <CircularProgress size={16} />}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
             <TextField
               size="small"
               label="Price Alert"
@@ -163,7 +170,7 @@ export function WatchlistSidebar() {
               onChange={(event) => setAlertPrice(Number(event.target.value))}
               inputProps={{ min: 0 }}
             />
-            <Button type="submit" variant="contained" disabled={availableSymbols.length === 0}>
+            <Button type="submit" variant="contained" disabled={!selectedSymbol || availableSymbols.length === 0}>
               Add to Watchlist
             </Button>
           </Stack>

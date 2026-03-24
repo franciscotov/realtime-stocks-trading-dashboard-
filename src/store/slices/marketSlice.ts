@@ -1,5 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { HistoricalPoint, IntervalResolution, QuoteState } from "@/types/stock";
+import type {
+  HistoricalPoint,
+  IntervalResolution,
+  QuoteState,
+} from "@/types/stock";
 
 interface MarketState {
   quotesBySymbol: Record<string, QuoteState>;
@@ -14,6 +18,9 @@ const MAX_BUCKET_POINTS_PER_SYMBOL = 240;
 const getIntervalMs = (resolution: IntervalResolution) =>
   Number(resolution) * 60 * 1000;
 
+const getBucketTimestamp = (timestamp: number, intervalMs: number) =>
+  Math.floor(timestamp / intervalMs) * intervalMs;
+
 const aggregateTicks = (
   ticks: HistoricalPoint[],
   resolution: IntervalResolution,
@@ -26,7 +33,7 @@ const aggregateTicks = (
   const bucketMap = new Map<number, number>();
 
   ticks.forEach((tick) => {
-    const bucketTimestamp = Math.floor(tick.timestamp / intervalMs) * intervalMs;
+    const bucketTimestamp = getBucketTimestamp(tick.timestamp, intervalMs);
     bucketMap.set(bucketTimestamp, tick.price);
   });
 
@@ -49,8 +56,13 @@ const marketSlice = createSlice({
   reducers: {
     quoteReceived: (
       state,
-      action: PayloadAction<{ symbol: string; price: number; timestamp: number }>,
+      action: PayloadAction<{
+        symbol: string;
+        price: number;
+        timestamp: number;
+      }>,
     ) => {
+      console.log('quote recieved')
       const current = state.quotesBySymbol[action.payload.symbol];
       const previousPrice = current?.price ?? null;
       const changePercent =
@@ -72,19 +84,37 @@ const marketSlice = createSlice({
         price: action.payload.price,
       });
 
-      state.ticksBySymbol[action.payload.symbol] = symbolTicks.slice(
-        -MAX_TICKS_PER_SYMBOL,
+      state.ticksBySymbol[action.payload.symbol] =
+        symbolTicks.slice(-MAX_TICKS_PER_SYMBOL);
+
+      const intervalMs = getIntervalMs(state.selectedInterval);
+      const nextBucketTimestamp = getBucketTimestamp(
+        action.payload.timestamp,
+        intervalMs,
       );
-      state.historyBySymbol[action.payload.symbol] = aggregateTicks(
-        state.ticksBySymbol[action.payload.symbol],
-        state.selectedInterval,
-      );
+      const symbolHistory = state.historyBySymbol[action.payload.symbol] ?? [];
+      const lastHistoryPoint = symbolHistory[symbolHistory.length - 1];
+
+      // updates the history by symbol only when the selected interval has elapsed
+      if (!lastHistoryPoint || nextBucketTimestamp > lastHistoryPoint.timestamp) {
+        symbolHistory.push({
+          timestamp: nextBucketTimestamp,
+          price: action.payload.price,
+        });
+
+        state.historyBySymbol[action.payload.symbol] = symbolHistory.slice(
+          -MAX_BUCKET_POINTS_PER_SYMBOL,
+        );
+      }
     },
     clearHistoryForSymbol: (state, action: PayloadAction<string>) => {
       delete state.historyBySymbol[action.payload];
       delete state.ticksBySymbol[action.payload];
     },
-    setIntervalResolution: (state, action: PayloadAction<IntervalResolution>) => {
+    setIntervalResolution: (
+      state,
+      action: PayloadAction<IntervalResolution>,
+    ) => {
       state.selectedInterval = action.payload;
 
       Object.keys(state.ticksBySymbol).forEach((symbol) => {
@@ -97,10 +127,7 @@ const marketSlice = createSlice({
   },
 });
 
-export const {
-  quoteReceived,
-  clearHistoryForSymbol,
-  setIntervalResolution,
-} = marketSlice.actions;
+export const { quoteReceived, clearHistoryForSymbol, setIntervalResolution } =
+  marketSlice.actions;
 
 export default marketSlice.reducer;
