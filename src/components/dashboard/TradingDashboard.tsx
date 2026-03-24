@@ -70,18 +70,18 @@ export function TradingDashboard() {
   }, [dispatch, symbols]);
 
   // alerts
-  // useEffect(() => {
-  //   watchlist.forEach((item) => {
-  //     const quote = quotesBySymbol[item.symbol];
-  //     if (!quote) {
-  //       return;
-  //     }
+  useEffect(() => {
+    watchlist.forEach((item) => {
+      const quote = quotesBySymbol[item.symbol];
+      if (!quote) {
+        return;
+      }
 
-  //     if (quote.price < item.alertPrice) {
-  //       notifyPriceDrop(item.symbol, quote.price, item.alertPrice);
-  //     }
-  //   });
-  // }, [quotesBySymbol, watchlist]);
+      if (quote.price < item.alertPrice) {
+        notifyPriceDrop(item.symbol, quote.price, item.alertPrice);
+      }
+    });
+  }, [quotesBySymbol, watchlist]);
 
   return (
     <Stack spacing={2}>
