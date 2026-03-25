@@ -1,3 +1,4 @@
+import { ensureFcmTokenRegistered } from "@/lib/firebaseClient";
 const THROTTLE_MS = 60_000;
 const STORAGE_PREFIX = "stock-alert-last-notification:";
 
@@ -6,11 +7,16 @@ export async function requestNotificationPermission() {
     return "denied";
   }
 
+  let permission = Notification.permission;
   if (Notification.permission === "default") {
-    return Notification.requestPermission();
+    permission = await Notification.requestPermission();
+  }
+  
+  if (permission === "granted") {
+    await ensureFcmTokenRegistered();
   }
 
-  return Notification.permission;
+  return permission;
 }
 
 export function canNotifyForSymbol(symbol: string) {
@@ -45,7 +51,15 @@ export function notifyPriceDrop(symbol: string, currentPrice: number, alertPrice
     return;
   }
 
-  const message = `${symbol} dropped to $${currentPrice.toFixed(2)} (alert $${alertPrice.toFixed(2)})`;
-  new Notification("Stock Alert", { body: message });
   markNotified(symbol);
+
+  void fetch("/api/notifications/stock-drop", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      symbol,
+      currentPrice,
+      alertPrice,
+    }),
+  });
 }

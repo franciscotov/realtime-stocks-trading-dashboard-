@@ -26,7 +26,8 @@ class FinnhubStreamClient {
           type?: string;
           data?: Array<{ p: number; s: string; t: number }>;
         };
-console.log({payload}, 'massage')
+        payload.data = [{ p: 10, s: 'AAPL', t: new Date().getMilliseconds() }];
+        payload.type = 'trade';
         if (payload.type !== "trade" || !payload.data) {
           return;
         }

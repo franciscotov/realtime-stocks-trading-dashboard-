@@ -62,7 +62,6 @@ const marketSlice = createSlice({
         timestamp: number;
       }>,
     ) => {
-      console.log('quote recieved')
       const current = state.quotesBySymbol[action.payload.symbol];
       const previousPrice = current?.price ?? null;
       const changePercent =
