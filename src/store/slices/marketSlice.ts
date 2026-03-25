@@ -47,7 +47,7 @@ const initialState: MarketState = {
   quotesBySymbol: {},
   ticksBySymbol: {},
   historyBySymbol: {},
-  selectedInterval: "1", // set in one just for debugging purposes
+  selectedInterval: "5",
 };
 
 const marketSlice = createSlice({
