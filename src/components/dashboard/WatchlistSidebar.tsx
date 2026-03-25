@@ -29,7 +29,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useStockSymbols } from "@/lib/useStockSymbols";
-import { COLOR_BORDER, COLOR_BORDER_SUBTLE } from "@/config/colors";
+import {
+  COLOR_ACCENT,
+  COLOR_BORDER,
+  COLOR_BORDER_SUBTLE,
+  COLOR_FOREGROUND_MUTED,
+  COLOR_SURFACE_ELEVATED,
+} from "@/config/colors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   addStock,
@@ -56,8 +62,9 @@ function SortableWatchItem({ symbol }: { symbol: string }) {
     <Paper
       ref={setNodeRef}
       sx={{
-        p: 1.2,
+        p: 1.4,
         border: `1px solid ${COLOR_BORDER_SUBTLE}`,
+        background: `linear-gradient(180deg, ${COLOR_SURFACE_ELEVATED}, rgba(16, 29, 53, 0.9))`,
         transform: CSS.Translate.toString(transform),
         transition,
       }}
@@ -66,7 +73,9 @@ function SortableWatchItem({ symbol }: { symbol: string }) {
         <IconButton size="small" {...attributes} {...listeners}>
           <DragIndicatorIcon fontSize="small" />
         </IconButton>
-        <Typography sx={{ width: 64, fontWeight: 700 }}>{item.symbol}</Typography>
+        <Typography sx={{ width: 64, fontWeight: 700, letterSpacing: "0.04em" }}>
+          {item.symbol}
+        </Typography>
         <TextField
           size="small"
           type="number"
@@ -129,13 +138,34 @@ export function WatchlistSidebar() {
     );
   };
   return (
-    <Paper elevation={0} sx={{ p: 2, border: `1px solid ${COLOR_BORDER}` }}>
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2.2,
+        border: `1px solid ${COLOR_BORDER}`,
+        background: `linear-gradient(180deg, rgba(21, 39, 70, 0.96), rgba(16, 29, 53, 0.94))`,
+      }}
+    >
       <Stack spacing={2}>
-        <Typography variant="h6" fontWeight={700}>
-          Watchlist
-        </Typography>
+        <Stack spacing={0.6}>
+          <Typography variant="h6" fontWeight={700}>
+            Watchlist
+          </Typography>
+          <Typography variant="body2" sx={{ color: COLOR_FOREGROUND_MUTED }}>
+            Add U.S. symbols from Finnhub and drag them into your preferred order.
+          </Typography>
+        </Stack>
 
-        <Box component="form" onSubmit={onAdd}>
+        <Box
+          component="form"
+          onSubmit={onAdd}
+          sx={{
+            p: 1.4,
+            borderRadius: 2,
+            border: `1px solid ${COLOR_BORDER_SUBTLE}`,
+            background: "rgba(9, 17, 31, 0.44)",
+          }}
+        >
           <Stack spacing={1.2}>
             <Autocomplete
               options={availableSymbols}
@@ -148,6 +178,7 @@ export function WatchlistSidebar() {
                   {...params}
                   label="Stock Symbol"
                   size="small"
+                  helperText={symbolsLoading ? "Loading Finnhub symbol universe..." : "Search by ticker"}
                   slotProps={{
                     input: {
                       ...params.InputProps,
@@ -188,6 +219,10 @@ export function WatchlistSidebar() {
             </Stack>
           </SortableContext>
         </DndContext>
+
+        <Typography variant="caption" sx={{ color: COLOR_ACCENT }}>
+          Tip: enable push alerts above to turn your watchlist into a live notification feed.
+        </Typography>
       </Stack>
     </Paper>
   );

@@ -22,7 +22,13 @@ import {
 import type { IntervalResolution } from "@/types/stock";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setIntervalResolution } from "@/store/slices/marketSlice";
-import { COLOR_BORDER, LINE_COLORS } from "@/config/colors";
+import {
+  COLOR_BORDER,
+  COLOR_FOREGROUND_MUTED,
+  COLOR_GRID,
+  COLOR_SURFACE_ELEVATED,
+  LINE_COLORS,
+} from "@/config/colors";
 
 export const MultiStockChart = memo(function MultiStockChart() {
   const dispatch = useAppDispatch();
@@ -69,7 +75,12 @@ export const MultiStockChart = memo(function MultiStockChart() {
   return (
     <Paper
       elevation={0}
-      sx={{ p: 2, border: `1px solid ${COLOR_BORDER}`, height: 440 }}
+      sx={{
+        p: 2.2,
+        border: `1px solid ${COLOR_BORDER}`,
+        height: 440,
+        background: `linear-gradient(180deg, ${COLOR_SURFACE_ELEVATED}, rgba(16, 29, 53, 0.92))`,
+      }}
     >
       <Stack
         direction="row"
@@ -97,18 +108,28 @@ export const MultiStockChart = memo(function MultiStockChart() {
             data={chartData}
             margin={{ top: 8, right: 16, left: 0, bottom: 8 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" minTickGap={24} />
-            <YAxis domain={["auto", "auto"]} />
-            <Tooltip />
-            <Legend />
+            <CartesianGrid stroke={COLOR_GRID} strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="time" minTickGap={24} tick={{ fill: COLOR_FOREGROUND_MUTED, fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis domain={["auto", "auto"]} tick={{ fill: COLOR_FOREGROUND_MUTED, fontSize: 12 }} axisLine={false} tickLine={false} width={56} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "rgba(16, 29, 53, 0.96)",
+                border: `1px solid ${COLOR_BORDER}`,
+                borderRadius: 14,
+              }}
+              labelStyle={{ color: "#ecf4ff" }}
+              itemStyle={{ color: "#ecf4ff" }}
+            />
+            <Legend wrapperStyle={{ color: COLOR_FOREGROUND_MUTED }} />
             {watchlist.map((item, index) => (
               <Line
                 key={item.symbol}
                 type="monotone"
                 dataKey={item.symbol}
                 stroke={LINE_COLORS[index % LINE_COLORS.length]}
-                strokeWidth={2}
+                strokeWidth={2.4}
+                dot={false}
+                activeDot={{ r: 4 }}
                 connectNulls
               />
             ))}

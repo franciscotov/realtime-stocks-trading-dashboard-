@@ -1,31 +1,32 @@
-// Brand
-export const COLOR_PRIMARY = "#0b3c5d";
-export const COLOR_SECONDARY = "#ff6f00";
+export const COLOR_PRIMARY = "#0f2038";
+export const COLOR_SECONDARY = "#2c8cff";
+export const COLOR_ACCENT = "#28d7ff";
 
-// Layout
-export const COLOR_BACKGROUND = "#f3f6fb";
-export const COLOR_FOREGROUND = "#0e1f2f";
+export const COLOR_BACKGROUND = "#07111f";
+export const COLOR_BACKGROUND_ALT = "#0b1730";
+export const COLOR_SURFACE = "#101d35";
+export const COLOR_SURFACE_ELEVATED = "#152746";
+export const COLOR_FOREGROUND = "#ecf4ff";
+export const COLOR_FOREGROUND_MUTED = "#92a5c6";
 
-// Borders
-export const COLOR_BORDER = "#dce3ec";
-export const COLOR_BORDER_SUBTLE = "#dde4ee";
+export const COLOR_BORDER = "#213451";
+export const COLOR_BORDER_SUBTLE = "#1a2a44";
+export const COLOR_GRID = "#314666";
 
-// Status
-export const COLOR_SUCCESS = "#2e7d32";
-export const COLOR_DANGER = "#c62828";
+export const COLOR_SUCCESS = "#22c55e";
+export const COLOR_DANGER = "#f43f5e";
+export const COLOR_WARNING = "#ffb547";
+export const COLOR_PURPLE = "#9b8cff";
+export const COLOR_INDIGO = "#5b7fff";
+export const COLOR_TEAL = "#2dd4bf";
+export const COLOR_ROSE = "#fb7185";
 
-// Chart accents
-export const COLOR_PURPLE = "#7b1fa2";
-export const COLOR_INDIGO = "#283593";
-export const COLOR_TEAL = "#00838f";
-
-// Chart line palette (ordered)
 export const LINE_COLORS = [
-  COLOR_PRIMARY,
   COLOR_SECONDARY,
-  COLOR_DANGER,
+  COLOR_ACCENT,
+  COLOR_WARNING,
   COLOR_SUCCESS,
   COLOR_PURPLE,
   COLOR_INDIGO,
-  COLOR_TEAL,
+  COLOR_ROSE,
 ];
