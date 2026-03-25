@@ -11,18 +11,13 @@ import {
 } from "@dnd-kit/core";
 import {
   SortableContext,
-  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Autocomplete,
   Box,
   Button,
   CircularProgress,
-  IconButton,
   Paper,
   Stack,
   TextField,
@@ -34,70 +29,10 @@ import {
   COLOR_BORDER,
   COLOR_BORDER_SUBTLE,
   COLOR_FOREGROUND_MUTED,
-  COLOR_SURFACE_ELEVATED,
 } from "@/config/colors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  addStock,
-  removeStock,
-  reorderWatchlist,
-  updateAlertPrice,
-} from "@/store/slices/watchlistSlice";
-
-function SortableWatchItem({ symbol }: { symbol: string }) {
-  const dispatch = useAppDispatch();
-  const item = useAppSelector((state) =>
-    state.watchlist.items.find((entry) => entry.symbol === symbol),
-  );
-
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: symbol,
-  });
-
-  if (!item) {
-    return null;
-  }
-
-  return (
-    <Paper
-      ref={setNodeRef}
-      sx={{
-        p: 1.4,
-        border: `1px solid ${COLOR_BORDER_SUBTLE}`,
-        background: `linear-gradient(180deg, ${COLOR_SURFACE_ELEVATED}, rgba(16, 29, 53, 0.9))`,
-        transform: CSS.Translate.toString(transform),
-        transition,
-      }}
-    >
-      <Stack direction="row" spacing={1} alignItems="center">
-        <IconButton size="small" {...attributes} {...listeners}>
-          <DragIndicatorIcon fontSize="small" />
-        </IconButton>
-        <Typography sx={{ width: 64, fontWeight: 700, letterSpacing: "0.04em" }}>
-          {item.symbol}
-        </Typography>
-        <TextField
-          size="small"
-          type="number"
-          label="Alert"
-          value={item.alertPrice}
-          onChange={(event) =>
-            dispatch(
-              updateAlertPrice({
-                symbol: item.symbol,
-                alertPrice: Number(event.target.value),
-              }),
-            )
-          }
-          sx={{ flex: 1 }}
-        />
-        <IconButton color="error" onClick={() => dispatch(removeStock(item.symbol))}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Stack>
-    </Paper>
-  );
-}
+import { addStock, reorderWatchlist } from "@/store/slices/watchlistSlice";
+import { SortableWatchItem } from "./SortableWatchItem";
 
 export function WatchlistSidebar() {
   const dispatch = useAppDispatch();
@@ -152,7 +87,8 @@ export function WatchlistSidebar() {
             Watchlist
           </Typography>
           <Typography variant="body2" sx={{ color: COLOR_FOREGROUND_MUTED }}>
-            Add U.S. symbols from Finnhub and drag them into your preferred order.
+            Add U.S. symbols from Finnhub and drag them into your preferred
+            order.
           </Typography>
         </Stack>
 
@@ -178,7 +114,11 @@ export function WatchlistSidebar() {
                   {...params}
                   label="Stock Symbol"
                   size="small"
-                  helperText={symbolsLoading ? "Loading Finnhub symbol universe..." : "Search by ticker"}
+                  helperText={
+                    symbolsLoading
+                      ? "Loading Finnhub symbol universe..."
+                      : "Search by ticker"
+                  }
                   slotProps={{
                     input: {
                       ...params.InputProps,
@@ -201,13 +141,21 @@ export function WatchlistSidebar() {
               onChange={(event) => setAlertPrice(Number(event.target.value))}
               inputProps={{ min: 0 }}
             />
-            <Button type="submit" variant="contained" disabled={!selectedSymbol || availableSymbols.length === 0}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!selectedSymbol || availableSymbols.length === 0}
+            >
               Add to Watchlist
             </Button>
           </Stack>
         </Box>
 
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
+        >
           <SortableContext
             items={watchlist.map((item) => item.symbol)}
             strategy={verticalListSortingStrategy}
@@ -221,7 +169,8 @@ export function WatchlistSidebar() {
         </DndContext>
 
         <Typography variant="caption" sx={{ color: COLOR_ACCENT }}>
-          Tip: enable push alerts above to turn your watchlist into a live notification feed.
+          Tip: enable push alerts above to turn your watchlist into a live
+          notification feed.
         </Typography>
       </Stack>
     </Paper>

@@ -1,10 +1,34 @@
-import { ensureFcmTokenRegistered } from "@/lib/firebaseClient";
+import {
+  disableFcmTokenRegistration,
+  ensureFcmTokenRegistered,
+  hasStoredFcmToken,
+} from "@/lib/firebaseClient";
+import {
+  PUSH_NOTIFICATION_STATUS,
+  type PushNotificationStatus,
+} from "@/config/notifications";
 const THROTTLE_MS = 60_000;
 const STORAGE_PREFIX = "stock-alert-last-notification:";
 
+export function getPushNotificationStatus(): PushNotificationStatus {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return PUSH_NOTIFICATION_STATUS.UNSUPPORTED;
+  }
+
+  if (Notification.permission === "denied") {
+    return PUSH_NOTIFICATION_STATUS.BLOCKED;
+  }
+
+  if (Notification.permission === "granted" && hasStoredFcmToken()) {
+    return PUSH_NOTIFICATION_STATUS.ENABLED;
+  }
+
+  return PUSH_NOTIFICATION_STATUS.DISABLED;
+}
+
 export async function requestNotificationPermission() {
   if (typeof window === "undefined" || !("Notification" in window)) {
-    return "denied";
+    return PUSH_NOTIFICATION_STATUS.UNSUPPORTED;
   }
 
   let permission = Notification.permission;
@@ -16,7 +40,12 @@ export async function requestNotificationPermission() {
     await ensureFcmTokenRegistered();
   }
 
-  return permission;
+  return getPushNotificationStatus();
+}
+
+export async function disablePushNotifications() {
+  await disableFcmTokenRegistration();
+  return getPushNotificationStatus();
 }
 
 export function canNotifyForSymbol(symbol: string) {

@@ -1,14 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import { Alert, Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
 import { FINNHUB_API_KEY } from "@/config/env";
 import { finnhubStreamClient } from "@/lib/finnhubClient";
 import {
+  disablePushNotifications,
+  getPushNotificationStatus,
   notifyPriceDrop,
   requestNotificationPermission,
 } from "@/lib/notificationService";
+import {
+  PUSH_NOTIFICATION_BUTTON_COLOR_BY_STATUS,
+  PUSH_NOTIFICATION_BUTTON_LABEL_BY_STATUS,
+  PUSH_NOTIFICATION_NON_INTERACTIVE_STATUSES,
+  PUSH_NOTIFICATION_STATUS,
+  type PushNotificationStatus,
+} from "@/config/notifications";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearHistoryForSymbol,
@@ -30,6 +39,9 @@ export function TradingDashboard() {
   const dispatch = useAppDispatch();
   const watchlist = useAppSelector((state) => state.watchlist.items);
   const quotesBySymbol = useAppSelector((state) => state.market.quotesBySymbol);
+  const [pushStatus, setPushStatus] = useState<PushNotificationStatus>(
+    () => (typeof window === "undefined" ? "disabled" : getPushNotificationStatus()),
+  );
 
   const symbols = useMemo(() => watchlist.map((item) => item.symbol), [watchlist]);
   const subscribedRef = useRef(new Set<string>());
@@ -56,6 +68,17 @@ export function TradingDashboard() {
       finnhubStreamClient.disconnect();
     };
   }, [dispatch]);
+
+  const handlePushNotificationsClick = useCallback(async () => {
+    if (pushStatus === PUSH_NOTIFICATION_STATUS.ENABLED) {
+      const status = await disablePushNotifications();
+      setPushStatus(status);
+      return;
+    }
+
+    const status = await requestNotificationPermission();
+    setPushStatus(status);
+  }, [pushStatus]);
 
   useEffect(() => {
     const current = subscribedRef.current;
@@ -91,6 +114,9 @@ export function TradingDashboard() {
     });
   }, [quotesBySymbol, watchlist]);
 
+  const pushButtonColor = PUSH_NOTIFICATION_BUTTON_COLOR_BY_STATUS[pushStatus];
+  const pushButtonLabel = PUSH_NOTIFICATION_BUTTON_LABEL_BY_STATUS[pushStatus];
+
   return (
     <Stack spacing={2.5}>
       <Box
@@ -98,7 +124,7 @@ export function TradingDashboard() {
           position: "relative",
           overflow: "hidden",
           p: { xs: 2.5, md: 3.5 },
-          borderRadius: 6,
+          borderRadius: 2,
           border: `1px solid ${COLOR_BORDER}`,
           background: `linear-gradient(145deg, ${COLOR_SURFACE_ELEVATED} 0%, ${COLOR_SURFACE} 62%, rgba(8, 16, 32, 0.96) 100%)`,
           boxShadow: "0 22px 55px rgba(2, 6, 23, 0.34)",
@@ -109,8 +135,8 @@ export function TradingDashboard() {
             position: "absolute",
             top: -90,
             right: -90,
-            width: 240,
-            height: 240,
+            width: 140,
+            height: 140,
             borderRadius: "50%",
             background: `radial-gradient(circle, rgba(40, 215, 255, 0.28), transparent 68%)`,
           }}
@@ -128,7 +154,7 @@ export function TradingDashboard() {
             >
               MARKET DESK
             </Typography>
-            <Typography variant="h4" fontWeight={800}>
+            <Typography variant="h4" fontWeight={800} >
               Trading Command Center
             </Typography>
             <Typography sx={{ color: COLOR_FOREGROUND_MUTED, maxWidth: 620 }}>
@@ -157,10 +183,12 @@ export function TradingDashboard() {
           <Stack justifyContent="space-between" alignItems={{ xs: "stretch", lg: "flex-end" }} spacing={2}>
             <Button
               variant="contained"
+              color={pushButtonColor}
               startIcon={<NotificationsActiveIcon />}
-              onClick={() => requestNotificationPermission()}
+              onClick={handlePushNotificationsClick}
+              disabled={PUSH_NOTIFICATION_NON_INTERACTIVE_STATUSES.includes(pushStatus)}
             >
-              Enable Push Alerts
+              {pushButtonLabel}
             </Button>
             <Typography sx={{ color: COLOR_SECONDARY, fontSize: 13, fontWeight: 600 }}>
               Streaming quotes with interval-aware history aggregation
