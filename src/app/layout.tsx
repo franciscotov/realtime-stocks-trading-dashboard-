@@ -1,5 +1,4 @@
-"use client"
-// import type { Metadata } from "next";
+"use client";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/AppProviders";
@@ -13,11 +12,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-// export const metadata: Metadata = {
-//   title: "Real-time Stocks Trading Dashboard",
-//   description: "Watchlist, live Finnhub stream, charting, alerts, and Auth0",
-// };
 
 export default function RootLayout({
   children,

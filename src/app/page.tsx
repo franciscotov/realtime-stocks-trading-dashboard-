@@ -1,10 +1,15 @@
-import { AuthGate } from "@/components/auth/AuthGate";
 import { TradingDashboard } from "@/components/dashboard/TradingDashboard";
+import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth0.getSession();
+
+  if (!session?.user) {
+    redirect("/auth/login");
+  }
+
   return (
-    // <AuthGate>
       <TradingDashboard />
-    // </AuthGate>
   );
 }

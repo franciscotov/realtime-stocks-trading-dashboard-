@@ -12,7 +12,7 @@
     "install:personal": "npm_config_userconfig=./.npmrc npm install"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.15.1",
+    "@auth0/nextjs-auth0": "^4.16.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
