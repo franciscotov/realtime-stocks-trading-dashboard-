@@ -1,30 +1,30 @@
 import { PropsWithChildren, type ReactElement } from "react";
-import { configureStore, type PreloadedState } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import { render } from "@testing-library/react";
 import watchlistReducer from "@/store/slices/watchlistSlice";
 import marketReducer from "@/store/slices/marketSlice";
 
-const rootReducer = {
+const reducer = combineReducers({
   watchlist: watchlistReducer,
   market: marketReducer,
-};
+});
 
 export type TestStoreState = {
   watchlist: ReturnType<typeof watchlistReducer>;
   market: ReturnType<typeof marketReducer>;
 };
 
-export function createTestStore(preloadedState?: PreloadedState<TestStoreState>) {
+export function createTestStore(preloadedState?: Partial<TestStoreState>) {
   return configureStore({
-    reducer: rootReducer,
+    reducer,
     preloadedState,
   });
 }
 
 export function renderWithStore(
   ui: ReactElement,
-  preloadedState?: PreloadedState<TestStoreState>,
+  preloadedState?: Partial<TestStoreState>,
 ) {
   const store = createTestStore(preloadedState);
 
